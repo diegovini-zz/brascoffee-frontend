@@ -24,19 +24,27 @@
 				</v-tooltip>
 			</v-row>
 
-			<v-card :class="`px-3 project ${project.status}`" v-for="(project,i) in projects" :key="i">
+			<!-- <v-card :class="`px-3 project ${project.status}`" v-for="(beverage,i) in beverage" :key="i"> -->
+			<v-card :class="`px-3 beverage ongoing`" v-for="(order,i) in orders" :key="i">
 				<v-row class="pa-3">
-					<v-col cols="12" sm="12" md="6">
-						<div class="caption grey--text">Project Title</div>
-						<div>{{project.title}}</div>
+					<v-col cols="6" sm="6" md="6">
+						<div class="caption grey--text">Beverage Ordered</div>
+						<div>{{order.beverage.description}}</div>
 					</v-col>
 
-					<v-col cols="12" sm="6" md="2">
-						<div class="caption grey--text">Person</div>
-						<div>{{project.person}}</div>
+					<v-col cols="6" sm="6" md="6">
+						<div class="caption grey--text">Final Price</div>
+						<div>{{order.finalPrice}}</div>
 					</v-col>
 
-					<v-col cols="12" sm="6" md="2">
+					<v-col cols="12" sm="12" md="12">
+						<div class="caption grey--text">Condiments</div>
+						<div v-for="(orderCondiment,i) in order.condiments" :key="i">
+							<v-chip class="v-chip--active" color="warning">{{orderCondiment.condiment.description}}</v-chip>
+						</div>
+					</v-col>
+
+					<!-- <v-col cols="12" sm="6" md="2">
 						<div class="caption grey--text">Due by</div>
 						<div>{{project.due}}</div>
 					</v-col>
@@ -48,7 +56,7 @@
 								:color="`${project.status}`"
 							>{{project.status}}</v-chip>
 						</div>
-					</v-col>
+					</v-col>-->
 				</v-row>
 				<v-row class="pa-0" cols="12">
 					<v-divider></v-divider>
@@ -61,12 +69,13 @@
 
 <script>
 import { repositoryFactory } from "@/repositories/repositoryFactory";
-const beverageRepository = repositoryFactory.get("beverageRepository");
+const orderRepository = repositoryFactory.get("orderRepository");
+
 
 export default {
 	data() {
 		return {
-			projects: [
+			/* 	projects: [
 				{
 					title: "Design new website",
 					person: "Mary",
@@ -91,36 +100,36 @@ export default {
 					due: "9 Sep 2020",
 					status: "late",
 				},
-			],
-			beverages: [],
+			], */
+			orders: [],
 		};
 	},
 	created() {
-		this.getBeverages();
+		this.getOrders();
+		
 	},
 	methods: {
 		sortBy(prop) {
-			this.projects.sort((a, b) => (a[prop] < b[prop] ? -1 : 1));
+			this.orders.sort((a, b) => (a[prop] < b[prop] ? -1 : 1));
 		},
-		async getBeverages() {
-			const response = await beverageRepository.getBeverages();
-
-			this.beverages = response.data;
+		async getOrders() {
+			const response = await orderRepository.getOrders();
+			this.orders = response.data;
 		},
 	},
 };
 </script>
 
 <style scoped>
-.project.ongoing {
+.beverage.ongoing {
 	border-left: 4px solid lightskyblue;
 }
 
-.project.completed {
+.beverage.completed {
 	border-left: 4px solid yellowgreen;
 }
 
-.project.late {
+.beverage.late {
 	border-left: 4px solid tomato;
 }
 

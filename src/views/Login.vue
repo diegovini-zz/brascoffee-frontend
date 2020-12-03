@@ -49,20 +49,16 @@ export default {
 			authPayload: {},
 		};
 	},
-	created(){
-		//console.log(this.$auth);
-	},
 	methods: {
 		async submit() {
 			try {
 				const response = await authRepository.login(this.authPayload);
-				if(response.data){
-					this.$auth.login(response.data.jwt)
-					this.$router.push({name:'dashboard'})
+				if (response.data) {
+					this.$auth.login(response.data);
+
+					this.$router.push({ name: "orders" });
 				}
-			} catch (error) {
-				console.log(error);
-			}
+			} catch (error) {}
 		},
 	},
 };

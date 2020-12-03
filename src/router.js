@@ -1,8 +1,13 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import { auth } from '@/services/authService'
-import Dashboard from './views/Dashboard.vue'
+import { VDatePickerYears } from 'vuetify/lib'
 
+import { repositoryFactory } from './repositories/repositoryFactory'
+import { auth } from './services/authService'
+import { roles } from './services/rolesService'
+
+
+const authRepository = repositoryFactory.get("authRepository")
 
 Vue.use(Router)
 
@@ -11,58 +16,93 @@ const router = new Router({
   base: process.env.BASE_URL,
   routes: [
     {
-      path: '/login',
-      name: 'login',
-      component: () => import('./views/Login.vue'),
-      meta: { requiresAuth: false }
+      path: '',
+      name: '',
+      redirect: 'login',
+      component: () => import('@/layouts/FullPage.vue'),
+      children: [
+        {
+          path: '/login',
+          name: 'login',
+          component: () => import('./views/Login.vue'),
+          meta: { requiresAuth: false, roles: [] }
+        },
+
+      ]
     },
     {
-      path: '/dashboard',
-      name: 'dashboard',
-      component: Dashboard,
-      meta: { requiresAuth: true }
+      path: '',
+      component: () => import('@/layouts/Panel.vue'),
+      children: [
+        {
+          path: '/beverages',
+          name: 'beverages',
+          component: () => import('./views/Beverages.vue'),
+          meta: { requiresAuth: true, roles: [roles.admin] },
+        },
+        {
+          path: '/condiments',
+          name: 'condiments',
+          // route level code-splitting
+          // this generates a separate chunk (about.[hash].js) for this route
+          // which is lazy-loaded when the route is visited.
+          component: () => import(/* webpackChunkName: "about" */ './views/Condiments.vue'),
+          meta: { requiresAuth: true, roles: [roles.admin] }
+        },
+        {
+          path: '/orders',
+          name: 'orders',
+          component: () => import('@/views/Orders.vue'),
+          meta: { requiresAuth: true, roles: [roles.admin, roles.user] }
+        },
+        {
+          path: '/notfound',
+          name: 'notfound',
+          component: () => import('./views/Notfound.vue'),
+          meta: { requiresAuth: true, roles: [] }
+        },
+
+      ]
     },
-    {
-      path: '/projects',
-      name: 'projects',
-      // route level code-splitting
-      // this generates a separate chunk (about.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
-      component: () => import(/* webpackChunkName: "about" */ './views/Projects.vue'),
-      meta: { requiresAuth: true }
-    },
-    {
-      path: '/team',
-      name: 'team',
-      component: () => import('./views/Team.vue'),
-      meta: { requiresAuth: true }
-    },
-    {
-      path: '/notfound',
-      name: 'notfound',
-      component: () => import('./views/Notfound.vue'),
-      meta: { requiresAuth: false }
-    },
+
+
   ]
 })
 
 router.beforeEach((to, from, next) => {
-  
+
   if (to.meta.requiresAuth) {
-    if (auth.isAuthenticated) {
-      next()
+    if (Vue.prototype['$auth'].isAuthenticated()) {
+
+      if (to.name === 'notfound') {
+        next()
+      }
+      authRepository.getUser().then(response => {
+        Vue.prototype.['$auth'].setUser(response.data.user)
+
+        if (to.meta.roles.filter(routeRoles => Vue.prototype['$auth'].getUserRoles().includes(routeRoles.toLowerCase())).length) {
+          next()
+        } else {
+          console.log('User does not have permission to access this link')
+          next({ name: 'notfound' })
+        }
+
+      })
     } else {
       next({ name: 'login' })
     }
   } else {
+    if (!to.name) {
+      next({ name: 'notfound' })
+    }
     next()
   }
 
-  //If not routes are found, redirect to 404
-  if (!to.name) {
-    next({ name: 'notfound' })
-  }
 
-})
+
+}
+)
+
+
 
 export default router

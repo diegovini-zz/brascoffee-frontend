@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { auth } from '@/services/authService'
+import Vue from 'vue'
 
 const errorKey = 'description'
 
@@ -10,6 +11,7 @@ const instance = axios.create({
 instance.interceptors.request.use(
   (config) => {
     let token = auth.getToken();
+    
     if (token) {
       config.headers['Authorization'] = `Bearer ${token}`;
     }
@@ -24,15 +26,17 @@ instance.interceptors.request.use(
 instance.interceptors.response.use((response) => {
   return response;
 }, (error) => {
+  
+  if(error.config.hasOwnProperty('errorHandle') && error.config.errorHandle === false){
+    return Promise.reject(error)
+  }
+  
   let failedResponse = error.response
-
   if (failedResponse.status === 403) {
-    console.log(failedResponse)
     auth.logout();
     return Promise.resolve(error);
   }
   else {
-    //console.log(failedResponse.data[errorKey])
     return Promise.resolve(error);
   }
 })
