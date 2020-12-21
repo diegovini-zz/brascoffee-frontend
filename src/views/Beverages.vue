@@ -142,14 +142,14 @@ export default {
 	data() {
 		return {
 			beverages: [],
-		};
-	},
-	created() {
+			};
+		},
+		created() {
 		this.getBeverages();
 	},
 	methods: {
 		sortBy(prop) {
-			this.beverages.sort((a, b) => (a[prop] < b[prop] ? -1 : 1));
+			this.beverages.sort((a, b) => (a[prop] > b[prop] ? -1 : 1));
 		},
 		async getBeverages() {
 			const response = await beverageRepository.getBeverages();
@@ -159,8 +159,7 @@ export default {
 		async deleteBeverage(id) {
 			
 			const response = await beverageRepository.deleteBeverage(id);
-			console.log(response)
-			if(response.data){
+			if(response.status==200){
 				this.$eventHub.$emit("showSnackBar", "Beverage deleted successfully");
 				this.getBeverages()
 			}else{

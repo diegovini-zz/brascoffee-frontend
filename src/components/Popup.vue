@@ -30,9 +30,7 @@ export default {
 	created() {
 		this.$eventHub.$on("closePopup", this.close);
 	},
-	beforeDestroy() {
-		this.$eventHub.$off("closePopup");
-	},
+	
 	methods: {
 		close() {
 			this.dialog = false;

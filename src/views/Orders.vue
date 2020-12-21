@@ -22,41 +22,79 @@
 					</template>
 					<span>Sort by Person</span>
 				</v-tooltip>
+				<v-spacer></v-spacer>
+				<Popup>
+					<template v-slot:button="{ on, attrs }">
+						<v-btn class="warning" v-bind="attrs" v-on="on">
+							<v-icon>mdi-plus</v-icon>
+							<span>Order</span>
+						</v-btn>
+					</template>
+					<template v-slot:title>Place order</template>
+					<template v-slot:content="slotProps">
+						<OrderForm
+							v-bind="slotProps.attr"
+							v-on="slotProps.on"
+							@updateOrderList="getOrders"
+						/>
+					</template>
+				</Popup>
 			</v-row>
+			
 
 			<!-- <v-card :class="`px-3 project ${project.status}`" v-for="(beverage,i) in beverage" :key="i"> -->
 			<v-card :class="`px-3 beverage ongoing`" v-for="(order,i) in orders" :key="i">
 				<v-row class="pa-3">
-					<v-col cols="6" sm="6" md="6">
+					<v-col cols="6" sm="6" md="5">
 						<div class="caption grey--text">Beverage Ordered</div>
 						<div>{{order.beverage.description}}</div>
 					</v-col>
 
-					<v-col cols="6" sm="6" md="6">
+					<v-col cols="6" sm="6" md="5">
 						<div class="caption grey--text">Final Price</div>
 						<div>{{order.finalPrice}}</div>
 					</v-col>
 
+					
+
+				<v-col cols="1" sm="1" md="1">
+						<Popup>
+							<template v-slot:button="slotProps">
+								<v-btn text v-bind="slotProps.attr" v-on="slotProps.on">
+									<v-icon>mdi-square-edit-outline</v-icon>
+								</v-btn>
+							</template>
+							<template v-slot:title>Edit order</template>
+							<template v-slot:content="slotProps">
+								<OrderForm
+									v-bind="slotProps.attr"
+									v-on="slotProps.on"
+									edit
+									:id="order.id"
+									@updateOrderList="getOrders"
+								/>
+							</template>
+						</Popup>
+					</v-col>
+					<v-col cols="1" sm="1" md="1">
+						<ConfirmDialog @accept="deleteOrder(order.id)">
+							<template v-slot:button="slotProps">
+								<v-btn text v-bind="slotProps.attr" v-on="slotProps.on">
+									<v-icon>mdi-trash-can-outline</v-icon>
+								</v-btn>
+							</template>
+							<template v-slot:title>Delete order</template>
+							<template v-slot:content
+								>Do you really want to delete this order?</template
+							>
+						</ConfirmDialog>
+					</v-col>
 					<v-col cols="12" sm="12" md="12">
 						<div class="caption grey--text">Condiments</div>
 						<div v-for="(orderCondiment,i) in order.condiments" :key="i">
 							<v-chip class="v-chip--active" color="warning">{{orderCondiment.condiment.description}}</v-chip>
 						</div>
 					</v-col>
-
-					<!-- <v-col cols="12" sm="6" md="2">
-						<div class="caption grey--text">Due by</div>
-						<div>{{project.due}}</div>
-					</v-col>
-
-					<v-col cols="12" sm="4" md="2">
-						<div class="d-flex justify-end">
-							<v-chip
-								class="v-chip--active white--text caption my-2"
-								:color="`${project.status}`"
-							>{{project.status}}</v-chip>
-						</div>
-					</v-col>-->
 				</v-row>
 				<v-row class="pa-0" cols="12">
 					<v-divider></v-divider>
@@ -73,6 +111,11 @@ const orderRepository = repositoryFactory.get("orderRepository");
 
 
 export default {
+		components: {
+		Popup: () => import("@/components/Popup"),
+		OrderForm: () => import("@/components/OrderForm"),
+		ConfirmDialog: () => import("@/components/ConfirmDialog"),
+	},
 	data() {
 		return {
 			/* 	projects: [

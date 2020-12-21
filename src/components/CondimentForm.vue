@@ -3,7 +3,7 @@
 		<v-form ref="form">
 			<v-text-field
 				label="Description"
-				v-model="beverage.description"
+				v-model="condiment.description"
 				prepend-icon="mdi-folder"
 				:rules="[rules.minValue]"
 			></v-text-field>
@@ -11,7 +11,7 @@
 				label="Cost"
 				prefix="$"
 				type="text"
-				v-model.lazy="beverage.cost"
+				v-model.lazy="condiment.cost"
 				prepend-icon="mdi-folder"
 				:rules="[rules.required]"
 				v-currency
@@ -31,18 +31,18 @@
 				</template>
 				<v-date-picker v-model="dueDate" @input="menuDueDate=false"></v-date-picker>
 			</v-menu>-->
-			<v-btn class="warning mt-3 mx-0" @click.stop="submit()" :loading="loading" v-if="!edit"
-				>Add Beverage</v-btn
+			<v-btn class="warning mt-3 mx-0" @click="submit()" :loading="loading" v-if="!edit"
+				>Add Condiment</v-btn
 			>
-			<v-btn class="warning mt-3 mx-0" @click.stop="submit()" :loading="loading" v-else
-				>Edit Beverage</v-btn
+			<v-btn class="warning mt-3 mx-0" @click="submit()" :loading="loading" v-else
+				>Edit Condiment</v-btn
 			>
 		</v-form>
 	</div>
 </template>
 <script>
 import { repositoryFactory } from "@/repositories/repositoryFactory";
-const beverageRepository = repositoryFactory.get("beverageRepository");
+const condimentRepository = repositoryFactory.get("condimentRepository");
 
 export default {
 	props: {
@@ -51,7 +51,7 @@ export default {
 	},
 	data() {
 		return {
-			beverage: {},
+			condiment: {},
 
 			rules: {
 				required: (value) => !!value || "Field Required",
@@ -63,7 +63,7 @@ export default {
 	},
 	created() {
 		if (this.edit) {
-			this.getBeverageById(this.id);
+			this.getCondimentById(this.id);
 		}
 	},
 	methods: {
@@ -74,17 +74,18 @@ export default {
 				let response = {};
 
 				if (!this.edit) {
-					response = await beverageRepository.addBeverage(this.beverage);
-					successMessage = "Beverage added successfully";
+					console.log(this.condiment)
+					response = await condimentRepository.addCondiment(this.condiment);
+					successMessage = "Condiment added successfully";
 				} else {
-					response = await beverageRepository.editBeverage(
+					response = await condimentRepository.editCondiment(
 						this.id,
-						this.beverage
+						this.condiment
 					);
-					successMessage = "Beverage edited successfully";
+					successMessage = "Condiment edited successfully";
 				}
 				if (response.data) {
-					this.$emit("updateBeverageList");
+					this.$emit("updateCondimentList");
 
 					this.$eventHub.$emit("showSnackBar", successMessage);
 					
@@ -94,10 +95,10 @@ export default {
 				}
 			}
 		},
-		async getBeverageById(id) {
-			const response = await beverageRepository.getBeverageById(id);
+		async getCondimentById(id) {
+			const response = await condimentRepository.getCondimentById(id);
 			if (response.data) {
-				this.beverage = response.data;
+				this.condiment = response.data;
 			}
 		},
 	},
